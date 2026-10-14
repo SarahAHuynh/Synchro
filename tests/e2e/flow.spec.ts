@@ -7,7 +7,7 @@ async function nav(page: Page, name: string) {
 }
 async function noOverflow(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
-  const title = (await page.getByRole('heading').first().innerText()).replace(/[^a-z0-9]/gi, '-');
+  const title = (await page.locator('main h1').first().innerText()).replace(/[^a-z0-9]/gi, '-');
   await page.screenshot({ path: test.info().outputPath(`${title}.png`), fullPage: true });
 }
 test('onboarding, planning, customization, navigation, and saved preferences', async ({ page }) => {
@@ -70,6 +70,7 @@ test('onboarding, planning, customization, navigation, and saved preferences', a
   await nav(page, 'Upcoming hangouts');
   await expect(page.getByRole('heading', { name: 'Sunday with friends' })).toHaveCount(1);
   await page.getByRole('button', { name: 'View hangout' }).click();
+  await page.locator('.planning-card').getByRole('button', { name: 'My preferences', exact: true }).click();
   await page.getByRole('button', { name: 'Keep my current preferences' }).click();
   await expect(page.getByText('$25 / person')).toBeVisible();
   await nav(page, 'Profile');

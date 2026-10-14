@@ -9,7 +9,7 @@ const items = [
 ] as const;
 export default function Navigation({ screen, onNavigate }: { screen: string; onNavigate: (screen: NavigationScreen) => void }) {
   return <nav aria-label="Main navigation">{items.map(({ screen: target, label, icon: Icon }) => {
-    const active = screen === target || target === 'create' && ['confirm', 'customize', 'ready'].includes(screen);
+    const active = screen === target || target === 'create' && ['confirm', 'customize', 'ready', 'planning'].includes(screen);
     return <button key={target} className={`nav-link ${active ? 'active' : ''}`} aria-current={active ? 'page' : undefined} onClick={() => onNavigate(target)}>
       <Icon size={19} />{label}{active && <span className="nav-dot" />}
     </button>;
