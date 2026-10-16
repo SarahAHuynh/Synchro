@@ -456,7 +456,7 @@ a.button, a.wordmark, a.nav-link, a.sidebar-profile, a.avatar { text-decoration:
 .preference-detail:nth-child(2n) { background: #e8efd9; border-color: #cbdab6; }
 .preference-detail:nth-child(2n) .preference-symbol { background: #d0dfb9; color: #4b6238; }
 .preference-detail:nth-child(3n) { background: #fae8d9; border-color: #e7cbb4; }
-.preference-detail h2 { font-size: 15px; color: #596052; margin-bottom: 6px; }
+.preference-detail h2 { font-size: 18px; color: #596052; margin-bottom: 6px; }
 .preference-detail p { margin: 0; font-size: 19px; font-weight: 600; text-transform: capitalize; }
 .favorites-detail { grid-column: 1 / -1; align-items: flex-start; }
 .favorites-detail .summary-pills { margin-bottom: 0; }
@@ -559,6 +559,8 @@ a.text-button[href='/account/preferences'] { background:#a74d20; border-color:#8
 .cancellation-notice .notice-dismiss:hover { background:#00000009; }
 .cancellation-notice .attention-notice-view { background:#c89318; border-color:#805c09; color:#2e2104; font-weight:700; }
 .cancellation-notice .attention-notice-view:hover { background:#ad7d0f; }
+.cancellation-notice .cancelled-notice-view { background:#963c32; border-color:#793127; color:#fffaf5; font-weight:700; }
+.cancellation-notice .cancelled-notice-view:hover { background:#793127; }
 .group-card-wrap { position:relative; }
 .cancelled-card-dismiss { position:absolute; z-index:2; top:12px; left:12px; width:34px; height:34px; display:grid; place-items:center; border:1px solid #9b5446; border-radius:50%; background:#fff8f0; color:#793127; font-size:25px; line-height:1; }
 .cancelled-card-dismiss:hover { background:#f4dcd2; }
@@ -569,6 +571,7 @@ a.text-button[href='/account/preferences'] { background:#a74d20; border-color:#8
 .profile-row a.text-button[href='/account/preferences'] { background:#ded0ef; border-color:#b39bc9; color:#49325e; }
 .profile-row a.text-button[href='/account/preferences']:hover { background:#cfbae6; }
 .summary-pills > span { min-height:36px; justify-content:center; text-align:center; }
+.favorites-detail .summary-pills > span { min-height:40px; padding:6px 11px; font-size:15px; }
 .verification-help { padding:18px; background:#f3eef7; border:1px solid #d6c6e2; border-radius:10px; margin:16px 0; }
 .auth-art { position:relative; margin-top:34px; }
 .auth-art .auth-decoration { position:absolute; right:-8px; top:-37px; z-index:1; transform:rotate(9deg); margin:0; }
