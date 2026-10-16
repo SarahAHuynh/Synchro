@@ -17,6 +17,12 @@ it('requests email confirmation with the app callback and keeps an unconfirmed s
   expect(await response.json()).toMatchObject({ signedIn: false, message: expect.stringContaining('Check your email') });
   expect(signUp).toHaveBeenCalledWith(expect.objectContaining({ options: { data: { name: 'Jamie' }, emailRedirectTo: 'http://localhost:3000/api/auth/callback' } }));
 });
+it('reports an already registered email when Supabase masks duplicate signups', async () => {
+  signUp.mockResolvedValue({ data: { session: null, user: { identities: [] } }, error: null });
+  const response = await POST(new Request('http://localhost:3000/api/auth', { method: 'POST', headers: { Origin: 'http://localhost:3000', 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'signup', email: 'jamie@example.com', name: 'Jamie', password: 'test-password-only' }) }));
+  expect(response.status).toBe(409);
+  expect((await response.json()).error).toContain('already uses this email');
+});
 it('exchanges a confirmation code and returns to the account with invitation resumption', async () => {
   exchangeCodeForSession.mockResolvedValue({ error: null });
   const response = await GET(new Request('http://localhost:3000/api/auth/callback?code=test-code'));

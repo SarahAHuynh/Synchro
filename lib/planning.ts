@@ -54,7 +54,8 @@ export function recommendActivities(activities: Activity[], preferences: UserPre
     );
   }).map(activity => {
     const fans = preferences.filter(person => person.categories.includes(activity.category)).length;
-    const score = fans * 10 + (activity.costPerPerson === 0 ? 1 : 0);
+    const rotation = [...`${slot.id}:${activity.id}`].reduce((total, character) => (total * 31 + character.charCodeAt(0)) % 1000, 0) / 1000;
+    const score = fans * 10 + (activity.costPerPerson === 0 ? 1 : 0) + rotation;
     return { ...activity, score, matchReason: fans ? `${fans} of ${preferences.length} people enjoy ${activity.category.toLowerCase()}. Fits everyone’s budget and available time.` : 'Fits everyone’s budget, pace, setting, and available time. A little something new.' };
   }).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 }
@@ -87,4 +88,3 @@ export function formatSlot(slot: TimeSlot): string {
 export function participantName(id: string, userId: string, userName: string): string {
   return id === userId ? `${userName.split(' ')[0]} (you)` : id.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
 }
-

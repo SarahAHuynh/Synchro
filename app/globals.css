@@ -487,7 +487,6 @@ a.button, a.wordmark, a.nav-link, a.sidebar-profile, a.avatar { text-decoration:
 .preference-detail .preference-symbol, .preference-detail:nth-child(2n) .preference-symbol, .preference-heading-icon { background:#f3c69f; color:#8b3d16; }
 .preference-detail h2 { color:#794729; }
 .preference-detail .summary-pills > span, .preferences-card .summary-pills > span { background:#ffefdF; border-color:#d8ac89; color:#674127; }
-.favorites-detail .summary-pills > span, .preference-categories.summary-pills > span { font-size:17px; padding:8px 14px; }
 .preferences-success { background:linear-gradient(135deg,#fcebdc,#f5d5b7); border-color:#dbad87; }
 .preferences-success .success-medallion { background:#a74d20; box-shadow:0 0 0 12px #f3cba8; }
 .preference-form .form-card { background:#fff4e9; border-color:#e0bd9e; }
@@ -552,11 +551,24 @@ a.text-button[href='/account/preferences'] { background:#a74d20; border-color:#8
 .attendance-pending { padding:14px; border-radius:10px; background:#eee4f5; font-size:15px; }
 .vote-confirmation { padding:30px; text-align:center; background:#ede5f5; margin-bottom:24px; }
 .vote-confirmation .success-icon { margin:0 auto 18px; }
+.vote-confirmation .success-icon { background:#e4f0dc; color:#315f37; border:2px solid #315f37; box-shadow:none; }
 .attention-card-label { background:#f6d592; color:#634214; padding:10px 16px; font-weight:700; border-radius:12px 12px 0 0; border:1px solid #cca55b; }
 .group-card-wrap:has(.attention-card-label) .hangout-card { border-top-left-radius:0; border-top-right-radius:0; border-color:#cca55b; }
 .cancellation-notice.notice-attention { background:#f9edc9; border-color:#d8c17c; }
 .cancellation-notice .notice-dismiss { background:transparent; border:0; color:#725750; box-shadow:none; width:36px; height:36px; padding:8px; }
 .cancellation-notice .notice-dismiss:hover { background:#00000009; }
+.cancellation-notice .attention-notice-view { background:#c89318; border-color:#805c09; color:#2e2104; font-weight:700; }
+.cancellation-notice .attention-notice-view:hover { background:#ad7d0f; }
+.group-card-wrap { position:relative; }
+.cancelled-card-dismiss { position:absolute; z-index:2; top:12px; left:12px; width:34px; height:34px; display:grid; place-items:center; border:1px solid #9b5446; border-radius:50%; background:#fff8f0; color:#793127; font-size:25px; line-height:1; }
+.cancelled-card-dismiss:hover { background:#f4dcd2; }
+.profile-heading .profile-signout, .profile-row .text-button { background:#ded0ef; border-color:#b39bc9; color:#49325e; }
+.profile-heading .profile-signout:hover, .profile-row .text-button:hover { background:#cfbae6; }
+.profile-row a.text-button[href='/account/preferences'], .preferences-card a.text-button[href='/account/preferences'] { background:#a74d20; border-color:#863a16; color:#fffaf5; }
+.profile-row a.text-button[href='/account/preferences']:hover, .preferences-card a.text-button[href='/account/preferences']:hover { background:#893b16; }
+.profile-row a.text-button[href='/account/preferences'] { background:#ded0ef; border-color:#b39bc9; color:#49325e; }
+.profile-row a.text-button[href='/account/preferences']:hover { background:#cfbae6; }
+.summary-pills > span { min-height:36px; justify-content:center; text-align:center; }
 .verification-help { padding:18px; background:#f3eef7; border:1px solid #d6c6e2; border-radius:10px; margin:16px 0; }
 .auth-art { position:relative; margin-top:34px; }
 .auth-art .auth-decoration { position:absolute; right:-8px; top:-37px; z-index:1; transform:rotate(9deg); margin:0; }

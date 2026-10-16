@@ -85,6 +85,9 @@ export async function POST(request: Request) {
         const fallback=diagnostic==='auth_connection_failed'?'Synchro could not reach the account service. Please try again.':diagnostic==='auth_server_error'?'The account service returned a server error.':'Signup could not be completed.';
         throw new ApiError(messages[code]??`${fallback} Error code: ${diagnostic} (HTTP ${status||'unavailable'}).`,diagnostic==='auth_connection_failed'||status>=500?503:400);
       }
+      if (Array.isArray(data.user?.identities) && data.user.identities.length === 0) {
+        throw new ApiError('An account already uses this email. Sign in instead, or reset its password if you need access.', 409);
+      }
       return json({ signedIn: Boolean(data.session), confirmationRequired:!data.session, message: data.session ? 'Your account is ready.' : 'Check your email for a verification link. Already registered? Sign in with your original method.' });
     }
     if (body.action === 'signin') {
