@@ -42,3 +42,10 @@ describe('live availability authorization and provider failures', () => {
     expect(provider).not.toHaveBeenCalled();
   });
 });
+
+it('requires upgrading an old free/busy-only connection before writing events', async () => {
+  const { calendarAccessToken } = await import('../lib/server/calendar');
+  lookup.mockReturnValue({ maybeSingle: async () => ({ data: { refresh_token_encrypted: 'encrypted-value', scope: 'https://www.googleapis.com/auth/calendar.freebusy' }, error: null }) });
+  await expect(calendarAccessToken('signed-in-user', true)).rejects.toThrow('Reconnect Google Calendar and allow event creation.');
+  expect(provider).not.toHaveBeenCalled();
+});

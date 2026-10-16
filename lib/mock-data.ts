@@ -1,5 +1,5 @@
 import type { Hangout, User, UserPreferences } from './types';
 export const defaultPreferences: UserPreferences = { budgetPerPerson: 25, energyLevel: 'medium', setting: 'either', categories: ['Food', 'Walking', 'Games'], duration: '1-2-hours', dislikedActivities: [], maxDistanceMiles: 10 };
 export const demoUser: User = { id: 'demo-user', name: 'Alex Morgan', email: 'alex@example.com', preferences: defaultPreferences, calendarStatus: 'not-connected' };
-export const categories = ['Food', 'Walking', 'Games', 'Creative activities', 'Movies', 'Sports', 'Relaxing activities'];
+export const categories = ['Food', 'Walking', 'Games', 'Creative activities', 'Movies', 'Sports', 'Relaxing activities', 'Coffee', 'Hiking', 'Museums', 'Live music', 'Cooking', 'Picnics', 'Bowling'];
 export const sampleHangout: Hangout = { id: 'sample', name: 'A little weekend catch-up', organizerId: 'demo-user', participantIds: ['demo-user', 'jamie@example.com', 'sam@example.com', 'riley@example.com'], dateRangeStart: '2026-10-17', dateRangeEnd: '2026-10-25', minDurationMinutes: 60, maxDurationMinutes: 120, status: 'draft', description: 'Good company. A little time to reconnect.' };

@@ -1,12 +1,11 @@
 import type { UserPreferences } from './types';
-import { categories } from './mock-data';
 export function validPreferences(value: unknown): value is UserPreferences {
   if (!value || typeof value !== 'object') return false;
   const p = value as Record<string, unknown>;
   return typeof p.budgetPerPerson === 'number' && Number.isFinite(p.budgetPerPerson) && p.budgetPerPerson >= 0 && p.budgetPerPerson <= 150 &&
     ['low', 'medium', 'high'].includes(String(p.energyLevel)) && ['indoor', 'outdoor', 'either'].includes(String(p.setting)) &&
-    Array.isArray(p.categories) && p.categories.length <= categories.length && p.categories.every(v => categories.includes(v)) &&
-    ['30-60', '1-2-hours', '2-3-hours'].includes(String(p.duration)) &&
+    Array.isArray(p.categories) && p.categories.length <= 30 && p.categories.every(v => typeof v === 'string' && v.trim().length > 0 && v.length <= 60) && new Set(p.categories.map(v => v.trim().toLowerCase())).size === p.categories.length &&
+    ['30-60', '1-2-hours', '2-3-hours', '3-plus-hours'].includes(String(p.duration)) &&
     Array.isArray(p.dislikedActivities) && p.dislikedActivities.length <= 30 && p.dislikedActivities.every(v => typeof v === 'string' && v.length <= 100) &&
     typeof p.maxDistanceMiles === 'number' && Number.isFinite(p.maxDistanceMiles) && p.maxDistanceMiles >= 1 && p.maxDistanceMiles <= 50;
 }

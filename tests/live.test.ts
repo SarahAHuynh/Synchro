@@ -24,8 +24,11 @@ describe('live input validation', () => {
   it('validates profile boundaries and avoids accepting incomplete objects', () => {
     expect(validPreferences(defaultPreferences)).toBe(true);
     expect(validPreferences({ ...defaultPreferences, budgetPerPerson: Infinity })).toBe(false);
-    expect(validPreferences({ ...defaultPreferences, categories: ['Invented'] })).toBe(false);
+    expect(validPreferences({ ...defaultPreferences, categories: ['Pottery'], duration: '3-plus-hours' })).toBe(true);
     expect(validPreferences({ ...defaultPreferences, dislikedActivities: [123] })).toBe(false);
+    expect(validPreferences({ ...defaultPreferences, categories: ['  '] })).toBe(false);
+    expect(validPreferences({ ...defaultPreferences, categories: ['Pottery', 'pottery'] })).toBe(false);
+    expect(validPreferences({ ...defaultPreferences, categories: ['x'.repeat(61)] })).toBe(false);
     expect(validPreferences(null)).toBe(false);
   });
   it('rejects invalid dates, excessive windows, and invalid zones', () => {

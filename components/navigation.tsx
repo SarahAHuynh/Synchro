@@ -1,17 +1,14 @@
-import { CalendarDays, LayoutGrid, Plus, Settings2, Users } from 'lucide-react';
-export type NavigationScreen = 'overview' | 'create' | 'preferences' | 'upcoming' | 'profile';
+import Link from 'next/link';
+import { CalendarDays, LayoutGrid, Plus, Settings2, Users, CalendarCheck } from 'lucide-react';
+export type NavigationScreen = 'overview' | 'create' | 'preferences' | 'upcoming' | 'profile' | 'calendar';
 const items = [
-  { screen: 'overview', label: 'Overview', icon: LayoutGrid },
-  { screen: 'create', label: 'Plan a hangout', icon: Plus },
-  { screen: 'preferences', label: 'My preferences', icon: Settings2 },
-  { screen: 'upcoming', label: 'Upcoming hangouts', icon: CalendarDays },
-  { screen: 'profile', label: 'Profile', icon: Users },
+  { screen:'overview',label:'Overview',icon:LayoutGrid,href:'/account' },
+  { screen:'create',label:'Plan a hangout',icon:Plus,href:'/account/plan' },
+  { screen:'upcoming',label:'Upcoming hangouts',icon:CalendarDays,href:'/account/hangouts' },
+  { screen:'preferences',label:'My preferences',icon:Settings2,href:'/account/preferences' },
+  { screen:'calendar',label:'My calendar',icon:CalendarCheck,href:'/account/calendar' },
+  { screen:'profile',label:'Profile',icon:Users,href:'/account/profile' },
 ] as const;
-export default function Navigation({ screen, onNavigate }: { screen: string; onNavigate: (screen: NavigationScreen) => void }) {
-  return <nav aria-label="Main navigation">{items.map(({ screen: target, label, icon: Icon }) => {
-    const active = screen === target || target === 'create' && ['confirm', 'customize', 'ready', 'planning'].includes(screen);
-    return <button key={target} className={`nav-link ${active ? 'active' : ''}`} aria-current={active ? 'page' : undefined} onClick={() => onNavigate(target)}>
-      <Icon size={19} />{label}{active && <span className="nav-dot" />}
-    </button>;
-  })}</nav>;
+export default function Navigation({screen}:{screen:string}) {
+  return <nav aria-label="Main navigation">{items.map(({screen:target,label,icon:Icon,href})=><Link key={target} href={href} className={`nav-link ${screen===target?'active':''}`} aria-current={screen===target?'page':undefined}><Icon size={19}/>{label}{screen===target&&<span className="nav-dot"/>}</Link>)}</nav>;
 }

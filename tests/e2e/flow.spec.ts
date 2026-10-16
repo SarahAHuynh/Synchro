@@ -1,91 +1,37 @@
-import { test, expect, type Page } from '@playwright/test';
-async function next(page: Page) { await page.getByRole('button', { name: 'Continue', exact: true }).click(); }
-async function nav(page: Page, name: string) {
-  const menu = page.getByRole('button', { name: 'Open navigation' });
-  if (await menu.isVisible()) await menu.click();
-  await page.getByRole('navigation').getByRole('button', { name, exact: true }).click();
-}
-async function noOverflow(page: Page) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
-  const title = (await page.locator('main h1').first().innerText()).replace(/[^a-z0-9]/gi, '-');
-  await page.screenshot({ path: test.info().outputPath(`${title}.png`), fullPage: true });
-}
-test('onboarding, planning, customization, navigation, and saved preferences', async ({ page }) => {
-  const errors: string[] = [];
-  page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Make time for your people.' })).toBeVisible();
-  await noOverflow(page);
-  await page.getByRole('button', { name: 'Get started', exact: true }).click();
-  await page.getByRole('button', { name: 'Create account' }).click();
-  await expect(page.getByText('Let us know what to call you.')).toBeVisible();
-  await page.getByLabel('Your name').fill('Taylor Chen');
-  await page.getByLabel('Email address').fill('taylor@example.com');
-  await page.getByLabel('Password', { exact: true }).fill('demo-password');
-  await page.getByLabel('Confirm password').fill('demo-password');
-  await noOverflow(page);
-  await page.getByRole('button', { name: 'Create account' }).click();
-  await expect(page.getByRole('button', { name: 'Continue', exact: true })).toBeDisabled();
-  await page.getByRole('button', { name: 'Connect Google Calendar', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Connected in demo' })).toBeVisible();
-  await noOverflow(page);
-  await next(page);
-  await page.getByRole('button', { name: 'Low Nice and easy' }).click();
-  await next(page);
-  await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Low Nice and easy' })).toHaveAttribute('aria-pressed', 'true');
-  await next(page); await next(page);
-  await page.getByLabel('Anything you’d rather skip?').fill('Loud concerts, hiking');
-  await noOverflow(page);
-  await page.getByRole('button', { name: 'Save preferences' }).click();
-  await expect(page.getByRole('heading', { name: 'Your preferences are saved.' })).toBeVisible();
-  await page.getByRole('button', { name: 'Go to overview' }).click();
-  await expect(page.getByRole('heading', { name: 'Hey, Taylor' })).toBeVisible();
-  await noOverflow(page);
-  await nav(page, 'Upcoming hangouts');
-  await expect(page.getByText('Your next memory is waiting.')).toBeVisible();
-  await nav(page, 'Plan a hangout');
-  await next(page);
-  await expect(page.getByText('Give your hangout a name.')).toBeVisible();
-  await page.getByLabel('What shall we call it?').fill('Sunday with friends');
-  await page.getByLabel('Friend 1 email').fill('jamie@example.com');
-  await page.getByLabel('Start date').fill('2026-10-17');
-  await page.getByLabel('End date').fill('2026-10-20');
-  await noOverflow(page);
-  await next(page);
-  await expect(page.getByRole('heading', { name: 'Does this still feel like you?' })).toBeVisible();
-  await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page.getByLabel('What shall we call it?')).toHaveValue('Sunday with friends');
-  await next(page);
-  await noOverflow(page);
-  await page.getByRole('button', { name: 'Customize for this hangout' }).click();
-  await expect(page.getByRole('heading', { name: 'Preferences for this hangout only' })).toBeVisible();
-  await page.getByRole('slider', { name: 'Budget per person' }).fill('60');
-  await next(page); await next(page);
-  await page.getByRole('button', { name: 'Save preferences' }).click();
-  await expect(page.getByText('$60 / person')).toBeVisible();
-  await page.getByRole('button', { name: 'Back to overview' }).click();
-  await nav(page, 'My preferences');
-  await expect(page.getByRole('slider', { name: 'Budget per person' })).toHaveValue('25');
-  await nav(page, 'Upcoming hangouts');
-  await expect(page.getByRole('heading', { name: 'Sunday with friends' })).toHaveCount(1);
-  await page.getByRole('button', { name: 'View hangout' }).click();
-  await page.locator('.planning-card').getByRole('button', { name: 'My preferences', exact: true }).click();
-  await page.getByRole('button', { name: 'Keep my current preferences' }).click();
-  await expect(page.getByText('$25 / person')).toBeVisible();
-  await nav(page, 'Profile');
-  await expect(page.getByText('taylor@example.com', { exact: true })).toBeVisible();
-  await noOverflow(page);
-  expect(errors).toEqual([]);
+import {test,expect} from '@playwright/test';
+import {installApp,owner,nav,savePreferences} from './app-fixture';
+test('the original welcome and sidebar lead to real account screens, with no demo route',async({page})=>{
+  const actor=owner();actor.signedIn=false;await installApp(page,actor,{group:null});
+  await page.goto('/?demo=1');await expect(page.getByRole('heading',{name:'Make time for your people.'})).toBeVisible();
+  await expect(page.getByText('PROTOTYPE',{exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'Sign in',exact:true})).toHaveCount(1);await expect(page.locator('.public-header').getByRole('link',{name:'Sign in'})).toHaveCount(0);
+  await page.getByRole('button',{name:'Get started',exact:true}).click();await expect(page).toHaveURL(/\/account\?mode=signup/);
+  await page.getByLabel('Your name').fill('Jamie');await page.getByLabel('Email address').fill(actor.email);await page.getByLabel('Password',{exact:true}).fill('password-for-testing');await page.getByLabel('Confirm password').fill('password-for-testing');await page.getByRole('button',{name:'Create account',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Hey, Jamie'})).toBeVisible();
+  await expect(page.locator('.dashboard-hero')).toBeVisible();await expect(page.locator('.empty-hangouts')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Check my availability'})).toHaveCount(0);
+  await nav(page,'My preferences');await page.getByRole('button',{name:'Edit preferences',exact:true}).click();await expect(page.getByRole('heading',{name:'My preferences'})).toBeVisible();await page.getByRole('slider',{name:'Budget per person'}).fill('40');await savePreferences(page);await expect(page.getByText('Your preferences are saved.',{exact:true})).toBeVisible();
+  await nav(page,'Overview');await expect(page.locator('.preferences-card')).toContainText('$40 / person');
+  await nav(page,'My calendar');await expect(page.getByRole('heading',{name:'Google Calendar',exact:true})).toBeVisible();
+  await nav(page,'Upcoming hangouts');await expect(page.getByRole('heading',{name:'Your hangouts.'})).toBeVisible();
+  await nav(page,'Profile');await expect(page.getByText(actor.email,{exact:true})).toBeVisible();await page.getByRole('button',{name:'Sign out'}).click();await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeVisible();
 });
-test('simulated sign-in and Google sign-up are usable', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Sign in', exact: true }).first().click();
-  await page.getByLabel('Your name').fill('Jordan');
-  await page.getByLabel('Email address').fill('jordan@example.com');
-  await page.getByRole('button', { name: 'Enter demo' }).click();
-  await expect(page.getByRole('heading', { name: 'Google Calendar', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await page.getByRole('button', { name: 'Sign up with Google · demo' }).click();
-  await expect(page.getByText('This is a simulated connection.', { exact: false })).toBeVisible();
+test('home keeps the original cards, readable spacing and responsive navigation',async({page})=>{
+  await installApp(page,owner(),{group:null});await page.goto('/account');
+  for(const width of [320,390,768,1440]){
+    await page.setViewportSize({width,height:900});await expect(page.locator('.empty-hangouts')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    const padding=await page.locator('.empty-hangouts').evaluate(el=>parseFloat(getComputedStyle(el).paddingLeft));expect(padding).toBeGreaterThanOrEqual(20);
+  }
+  await page.screenshot({path:test.info().outputPath('unified-home.png'),fullPage:true,animations:'disabled'});
+  await page.emulateMedia({reducedMotion:'reduce'});expect(await page.locator('.screen-transition').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+});
+test('saved preferences open for editing and retain custom activities and longer duration',async({page})=>{
+  const actor=owner();await installApp(page,actor,{group:null});await page.goto('/account/preferences');
+  await expect(page.getByRole('slider')).toHaveCount(0);await expect(page.locator('.saved-preferences')).toContainText('Food');
+  await page.getByRole('button',{name:'Edit preferences',exact:true}).click();await page.getByRole('button',{name:'Continue'}).click();
+  await page.getByLabel('Add an activity').fill('Pottery');await page.getByRole('button',{name:'Add',exact:true}).click();await page.getByRole('button',{name:'3+ hours',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Pottery',exact:true})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'Continue'}).click();await expect(page.locator('.form-card .soft-note')).toHaveCount(0);await page.getByRole('button',{name:'Save preferences'}).click();
+  await expect(page.getByText('Your preferences are saved.',{exact:true})).toBeVisible();await expect(page.locator('.form-card')).toHaveCount(0);await expect(page.getByRole('button',{name:'Edit preferences',exact:true})).toBeVisible();
+  await page.screenshot({path:test.info().outputPath('preferences-confirmation.png'),fullPage:true,animations:'disabled'});await page.reload();await expect(page.locator('.saved-preferences')).toContainText('Pottery');await expect(page.locator('.saved-preferences')).toContainText('3+ hours');await expect(page.getByRole('slider')).toHaveCount(0);
+  await page.screenshot({path:test.info().outputPath('saved-preferences.png'),fullPage:true,animations:'disabled'});
 });

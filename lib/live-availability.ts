@@ -13,7 +13,7 @@ export function zonedTime(date: string, minutes: number, zone: string) {
   return result;
 }
 export function nextDate(date: string) { return new Date(Date.parse(`${date}T00:00:00Z`) + 86400000).toISOString().slice(0, 10); }
-export function liveFreeWindows(start: string, end: string, zone: string, duration: number, busy: LiveWindow[], now = Date.now()): LiveWindow[] {
+export function liveFreeWindows(start: string, end: string, zone: string, duration: number, busy: LiveWindow[], now = Date.now(), maxDuration = duration): LiveWindow[] {
   const result: LiveWindow[] = [];
   const blocks = busy.map(window => ({ start: Date.parse(window.start), end: Date.parse(window.end) })).sort((a,b) => a.start - b.start);
   // Malformed provider data must never be interpreted as an empty calendar.
@@ -23,7 +23,7 @@ export function liveFreeWindows(start: string, end: string, zone: string, durati
     let cursor = Math.max(opening, now);
     const add = (from: number, until: number) => {
       const rounded = opening + Math.ceil((from - opening) / 1800000) * 1800000;
-      if (until - rounded >= duration * 60000) result.push({ start: new Date(rounded).toISOString(), end: new Date(rounded + duration * 60000).toISOString() });
+      if (until - rounded >= duration * 60000) result.push({ start: new Date(rounded).toISOString(), end: new Date(rounded + Math.min((until - rounded) / 60000, maxDuration) * 60000).toISOString() });
     };
     for (const block of blocks) {
       if (block.end <= cursor || block.start >= closing) continue;

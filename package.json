@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "check:setup": "node scripts/check-setup.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.8.0",
@@ -21,6 +22,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
     "@playwright/test": "^1.51.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",

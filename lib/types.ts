@@ -3,7 +3,7 @@ export type UserPreferences = {
   energyLevel: 'low' | 'medium' | 'high';
   setting: 'indoor' | 'outdoor' | 'either';
   categories: string[];
-  duration: '30-60' | '1-2-hours' | '2-3-hours';
+  duration: '30-60' | '1-2-hours' | '2-3-hours' | '3-plus-hours';
   dislikedActivities: string[];
   maxDistanceMiles: number;
 };

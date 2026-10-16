@@ -94,6 +94,6 @@ export default function ActivityScene({ activity, compact = false }: { activity:
         <Mug x={589} y={285} color="#b992ab" />
       </>}
     </svg>
-    <span className="scene-category">{activity.category}</span>
+    {activity.category&&<span className="scene-category">{activity.category}</span>}
   </div>;
 }

@@ -1,3 +1,4 @@
+import { CALENDAR_SCOPES } from '@/lib/calendar-scopes';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { appOrigin, calendarConfigured } from '@/lib/server/config';
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
     if (!code) return redirect('failed');
     const response = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', body: new URLSearchParams({ code, client_id: process.env.GOOGLE_CLIENT_ID!, client_secret: process.env.GOOGLE_CLIENT_SECRET!, redirect_uri: `${appOrigin()}/api/calendar/callback`, grant_type: 'authorization_code', code_verifier: session.verifier }), cache: 'no-store', signal: AbortSignal.timeout(15000) });
     const tokens = await response.json();
-    if (!response.ok || typeof tokens.refresh_token !== 'string' || typeof tokens.scope !== 'string' || !tokens.scope.split(' ').includes('https://www.googleapis.com/auth/calendar.freebusy')) return redirect('failed');
+    if (!response.ok || typeof tokens.refresh_token !== 'string' || typeof tokens.scope !== 'string' || !CALENDAR_SCOPES.split(' ').every(scope => tokens.scope.split(' ').includes(scope))) return redirect('failed');
     const { error } = await adminClient().from('calendar_connections').upsert({ user_id: user.id, refresh_token_encrypted: encryptToken(tokens.refresh_token, process.env.CALENDAR_TOKEN_ENCRYPTION_KEY!), scope: tokens.scope, connected_at: new Date().toISOString() });
     if (error) return redirect('failed');
     return redirect('connected');
