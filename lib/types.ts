@@ -52,5 +52,6 @@ export type Activity = {
   maxDurationMinutes: number;
   distanceMiles: number;
   tags: string[];
+  timeOfDay?: Array<'daylight' | 'evening'>;
 };
 export type ActivitySuggestion = Activity & { matchReason: string; score: number };

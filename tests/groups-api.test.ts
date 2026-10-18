@@ -51,6 +51,7 @@ const read = () => GET(new Request(`http://localhost:3000/api/hangouts/${id}`), 
 const input = { name: 'Sunday together', description: '', start: '2027-01-17', end: '2027-01-17', timeZone: 'UTC', min: 60, max: 120, emails: ['alex@example.com'], consent: true };
 beforeEach(() => {
   vi.stubEnv('CALENDAR_TOKEN_ENCRYPTION_KEY', 'a'.repeat(64));
+  vi.stubEnv('OPENAI_API_KEY', '');
   user = { id: 'owner', email: 'jamie@example.com', email_confirmed_at: '2026-01-01' }; stored = null; conflict = false; profileWrites = 0;
   vi.mocked(sessionClient).mockImplementation(async () => ({ ...db(), auth: { getUser: async () => ({ data: { user }, error: null }) } }) as unknown as Awaited<ReturnType<typeof sessionClient>>);
   vi.mocked(adminClient).mockImplementation(() => db() as unknown as ReturnType<typeof adminClient>);

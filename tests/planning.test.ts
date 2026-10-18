@@ -51,15 +51,22 @@ describe('recommendations after selecting time', () => {
       expect(activity.distanceMiles).toBeLessThanOrEqual(1);
     }
   });
-  it('does not silently relax dislikes or conflicting settings', () => {
+  it('keeps explicit dislikes as a veto and offers a transparent compromise for conflicting settings', () => {
     const dislikes = { ...copyPreferences(defaultPreferences), dislikedActivities: ['GAMES', 'coffee'] };
     const ids = recommendActivities(demoActivities, [dislikes], slot).map(activity => activity.id);
     expect(ids).not.toContain('games'); expect(ids).not.toContain('coffee');
-    expect(recommendActivities(demoActivities, [{ ...defaultPreferences, setting: 'indoor' }, { ...defaultPreferences, setting: 'outdoor' }], slot)).toEqual([]);
+    const compromise = recommendActivities(demoActivities, [{ ...defaultPreferences, setting: 'indoor' }, { ...defaultPreferences, setting: 'outdoor' }], slot);
+    expect(compromise.length).toBeGreaterThan(0);
+    expect(compromise.every(activity => activity.matchReason.startsWith('A compromise pick'))).toBe(true);
   });
   it('excludes activities too long or too short for the selected time', () => {
     expect(recommendActivities(demoActivities, [defaultPreferences], { ...slot, endMinutes: 750 }).map(activity => activity.id)).not.toContain('movie');
     expect(recommendActivities(demoActivities, [defaultPreferences], { ...slot, endMinutes: 1200 })).toEqual([]);
+  });
+  it('excludes daylight-only activities for an evening hangout', () => {
+    const evening = recommendActivities(demoActivities, [defaultPreferences], { ...slot, startMinutes: 19 * 60, endMinutes: 21 * 60 });
+    expect(evening.map(activity => activity.id)).not.toContain('picnic');
+    expect(evening.map(activity => activity.id)).not.toContain('farmers-market');
   });
   it('uses hangout preference snapshots without mutating a profile', () => {
     const current = copyPreferences(defaultPreferences);

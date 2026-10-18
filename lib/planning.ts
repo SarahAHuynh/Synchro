@@ -40,24 +40,36 @@ export function findSharedTimes(hangout: Hangout, calendars: ParticipantAvailabi
 export function recommendActivities(activities: Activity[], preferences: UserPreferences[], slot: TimeSlot): ActivitySuggestion[] {
   if (!preferences.length) return [];
   const energy = { low: 0, medium: 1, high: 2 };
-  return activities.filter(activity => {
-    const length = slot.endMinutes - slot.startMinutes;
-    return activity.minDurationMinutes <= length && activity.maxDurationMinutes >= length && preferences.every(person =>
-      activity.costPerPerson <= person.budgetPerPerson &&
-      activity.distanceMiles <= person.maxDistanceMiles &&
-      (person.setting === 'either' || person.setting === activity.setting) &&
-      energy[activity.energyLevel] <= energy[person.energyLevel] &&
-      !person.dislikedActivities.some(dislike => {
-        const term = dislike.trim().toLowerCase();
-        return term.length > 0 && [activity.name, activity.category, ...activity.tags].some(label => label.toLowerCase().includes(term));
-      })
-    );
-  }).map(activity => {
+  const period = slot.startMinutes >= 18 * 60 || slot.endMinutes > 20 * 60 ? 'evening' : 'daylight';
+  const length = slot.endMinutes - slot.startMinutes;
+  const explicitlyDisliked = (activity: Activity, person: UserPreferences) => person.dislikedActivities.some(dislike => {
+    const term = dislike.trim().toLowerCase();
+    return term.length > 0 && [activity.name, activity.category, ...activity.tags].some(label => label.toLowerCase().includes(term));
+  });
+  const fitsPerson = (activity: Activity, person: UserPreferences) =>
+    activity.costPerPerson <= person.budgetPerPerson &&
+    activity.distanceMiles <= person.maxDistanceMiles &&
+    (person.setting === 'either' || person.setting === activity.setting) &&
+    energy[activity.energyLevel] <= energy[person.energyLevel] &&
+    !explicitlyDisliked(activity, person);
+  const timeCompatible = activities.filter(activity =>
+    (!activity.timeOfDay || activity.timeOfDay.includes(period)) && activity.minDurationMinutes <= length && activity.maxDurationMinutes >= length
+  );
+  const toSuggestion = (activity: Activity, matches: number, compromise: boolean): ActivitySuggestion => {
     const fans = preferences.filter(person => person.categories.includes(activity.category)).length;
     const rotation = [...`${slot.id}:${activity.id}`].reduce((total, character) => (total * 31 + character.charCodeAt(0)) % 1000, 0) / 1000;
-    const score = fans * 10 + (activity.costPerPerson === 0 ? 1 : 0) + rotation;
-    return { ...activity, score, matchReason: fans ? `${fans} of ${preferences.length} people enjoy ${activity.category.toLowerCase()}. Fits everyone’s budget and available time.` : 'Fits everyone’s budget, pace, setting, and available time. A little something new.' };
-  }).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+    const score = matches * 100 + fans * 10 + (activity.costPerPerson === 0 ? 1 : 0) + rotation;
+    const fit = compromise ? `A compromise pick that fits ${matches} of ${preferences.length} people’s budget, pace, setting, and travel preferences.` : fans ? `${fans} of ${preferences.length} people enjoy ${activity.category.toLowerCase()}. Fits everyone’s budget, pace, setting, and available time.` : 'Fits everyone’s budget, pace, setting, and available time. A little something new.';
+    return { ...activity, score, matchReason: fit };
+  };
+  const strict = timeCompatible.filter(activity => preferences.every(person => fitsPerson(activity, person)));
+  if (strict.length) return strict.map(activity => toSuggestion(activity, preferences.length, false)).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+  return timeCompatible
+    .filter(activity => !preferences.some(person => explicitlyDisliked(activity, person)))
+    .map(activity => ({ activity, matches: preferences.filter(person => fitsPerson(activity, person)).length }))
+    .filter(({ matches }) => matches > 0)
+    .map(({ activity, matches }) => toSuggestion(activity, matches, true))
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 }
 
 export function tallyVotes(activities: Activity[], participantIds: string[], votes: Record<string, string>) {

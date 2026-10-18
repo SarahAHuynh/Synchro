@@ -9,7 +9,7 @@ export type GroupPlan = {
   cancellationReason?:string; attendanceRequests?:AttendanceRequest[];
   id: string; calendarRevision?: string; inviteVersion?: string; organizerId: string; name: string; description: string; start: string; end: string; timeZone: string;
   min: number; max: number; members: GroupMember[]; status: 'planning' | 'voting' | 'confirmed' | 'cancelled';
-  windows: LiveWindow[]; checkedAt: string | null; selected: LiveWindow | null; activities: ActivitySuggestion[];
+  windows: LiveWindow[]; checkedAt: string | null; selected: LiveWindow | null; activities: ActivitySuggestion[]; activitiesAiCurated?: boolean;
   votes: Record<string, string>; confirmedActivityId: string | null; createdAt: string;
 };
 export type CalendarSyncStatus = {scheduled:number;pending:number;failed:number;removing:number;needsReconnect:boolean;unavailable?:boolean};
@@ -29,7 +29,7 @@ export function validGroupInput(body: Record<string, unknown>, now = Date.now())
     typeof body.min === 'number' && Number.isInteger(body.min) && body.min >= 30 && typeof body.max === 'number' && Number.isInteger(body.max) && body.max >= body.min && body.max <= 480;
 }
 export function resetPlan(group: GroupPlan) {
-  group.status = 'planning'; group.windows = []; group.checkedAt = null; group.selected = null; group.activities = []; group.votes = {}; group.confirmedActivityId = null;
+  group.status = 'planning'; group.windows = []; group.checkedAt = null; group.selected = null; group.activities = []; group.activitiesAiCurated = false; group.votes = {}; group.confirmedActivityId = null;
 }
 export function groupTally(group: GroupPlan) {
   const counts = Object.fromEntries(group.activities.map(activity => [activity.id, 0]));

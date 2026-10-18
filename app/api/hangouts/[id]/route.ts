@@ -10,6 +10,7 @@ import { validPreferences } from '@/lib/live-validation';
 import { liveFreeWindows } from '@/lib/live-availability';
 import { recommendActivities } from '@/lib/planning';
 import { activityCatalog } from '@/lib/activity-catalog';
+import { curateActivities } from '@/lib/server/activity-recommender';
 type Context = { params: Promise<{ id: string }> };
 export const runtime = 'nodejs';
 export const maxDuration = 120;
@@ -98,7 +99,11 @@ export async function POST(request: Request, context: Context) {
       if (!slot) throw new ApiError('Choose one of the shared times.', 400);
       await checkSelected(group, slot);
       const minutes = (Date.parse(slot.end) - Date.parse(slot.start)) / 60000;
-      group.activities = recommendActivities(activityCatalog, group.members.map(item => item.preferences!), { id: slot.start, date: group.start, startMinutes: 0, endMinutes: minutes });
+      const localMinute = new Intl.DateTimeFormat('en-US', { timeZone: group.timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(slot.start)).reduce((total, part) => part.type === 'hour' ? total + Number(part.value) * 60 : part.type === 'minute' ? total + Number(part.value) : total, 0);
+      const selectedTime = { startMinutes: localMinute, endMinutes: localMinute + minutes, timeZone: group.timeZone };
+      const candidates = recommendActivities(activityCatalog, group.members.map(item => item.preferences!), { id: slot.start, date: group.start, ...selectedTime });
+      const curation = await curateActivities(candidates, group.members.map(item => item.preferences!), selectedTime);
+      group.activities = curation.activities; group.activitiesAiCurated = curation.usedAI;
       group.selected = slot; group.status = 'voting'; group.votes = {}; group.confirmedActivityId = null;
     } else if (body.action === 'vote') {
       if (group.status !== 'voting' || !group.selected || Date.parse(group.selected.start) <= Date.now()) throw new ApiError('Voting is not open for this time.', 409);
