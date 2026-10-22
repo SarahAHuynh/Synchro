@@ -1,11 +1,12 @@
 'use client';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Bell, X } from 'lucide-react';
 import { api } from '@/lib/client-api';
 import type { GroupSummary } from '@/lib/groups';
 type Notice={id:string;title:string;reason:string;href?:string;kind:'cancelled'|'attention'|'info';name?:string};
 export default function CancellationNotices({userId}:{userId:string}) {
+ const router=useRouter();
  const [notices,setNotices]=useState<Notice[]>([]);const storageKey=`synchro:seen-cancellations:${userId}`;
  useEffect(()=>{
   let active=true;
@@ -21,5 +22,5 @@ export default function CancellationNotices({userId}:{userId:string}) {
   return()=>{active=false;clearInterval(tick);window.removeEventListener('focus',onRefresh);window.removeEventListener('synchro:hangouts-updated',onRefresh);};
  },[storageKey]);
  function dismiss(id:string){setNotices(current=>current.filter(n=>n.id!==id));try{const saved=JSON.parse(localStorage.getItem(storageKey)??'[]');localStorage.setItem(storageKey,JSON.stringify([...new Set([...(Array.isArray(saved)?saved:[]),id])]));}catch{}}
- return notices.length?<section className="cancellation-notices" aria-label="Hangout notifications" aria-live="polite">{notices.map(notice=><div className={`cancellation-notice notice-${notice.kind}`} key={notice.id}><Bell size={21}/><span><strong>{notice.title}</strong><span>{notice.reason}</span></span>{notice.href&&<Link className={`text-button ${notice.kind==='attention'?'attention-notice-view':notice.kind==='cancelled'?'cancelled-notice-view':''}`} href={notice.href}>View</Link>}<button className="icon-button notice-dismiss" aria-label={notice.kind==='cancelled'?`Dismiss cancellation for ${notice.name}`:`Dismiss notification: ${notice.title}`} onClick={()=>dismiss(notice.id)}><X size={19}/></button></div>)}</section>:null;
+ return notices.length?<section className="cancellation-notices" aria-label="Hangout notifications" aria-live="polite">{notices.map(notice=><div className={`cancellation-notice notice-${notice.kind}`} key={notice.id}><Bell size={21}/><span><strong>{notice.title}</strong><span>{notice.reason}</span></span>{notice.href&&<button type="button" className={`text-button ${notice.kind==='attention'?'attention-notice-view':notice.kind==='cancelled'?'cancelled-notice-view':''}`} onClick={()=>router.push(notice.href!)} aria-label="View hangout">View</button>}<button className="icon-button notice-dismiss" aria-label={notice.kind==='cancelled'?`Dismiss cancellation for ${notice.name}`:`Dismiss notification: ${notice.title}`} onClick={()=>dismiss(notice.id)}><X size={19}/></button></div>)}</section>:null;
 }
